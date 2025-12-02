@@ -23,7 +23,6 @@ namespace Tour_Website.Controllers
         public ActionResult Contact()
         {
             ViewBag.Message = "Your contact page.";
-
             return View();
         }
 
