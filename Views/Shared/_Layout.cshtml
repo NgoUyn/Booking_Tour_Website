@@ -1,0 +1,213 @@
+﻿@{
+    var title = ViewBag.Title ?? "VietWander";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>@title</title>
+
+    <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700,800,900" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Arizonia&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <link rel="stylesheet" href="@Url.Content("~/Content/pacific-main/css/animate.css")">
+    <link rel="stylesheet" href="@Url.Content("~/Content/pacific-main/css/owl.carousel.min.css")">
+    <link rel="stylesheet" href="@Url.Content("~/Content/pacific-main/css/owl.theme.default.min.css")">
+    <link rel="stylesheet" href="@Url.Content("~/Content/pacific-main/css/magnific-popup.css")">
+    <link rel="stylesheet" href="@Url.Content("~/Content/pacific-main/css/bootstrap-datepicker.css")">
+    <link rel="stylesheet" href="@Url.Content("~/Content/pacific-main/css/jquery.timepicker.css")">
+    <link rel="stylesheet" href="@Url.Content("~/Content/pacific-main/css/flaticon.css")">
+    <link rel="stylesheet" href="@Url.Content("~/Content/pacific-main/css/style.css")">
+    @RenderSection("head", required: false)
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark ftco_navbar bg-dark ftco-navbar-light" id="ftco-navbar">
+        <div class="container">
+            <a class="navbar-brand" href="@Url.Action("Index","Home")">Pacific<span>Travel Agency</span></a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav" aria-controls="ftco-nav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="oi oi-menu"></span> Menu
+            </button>
+
+            <div class="collapse navbar-collapse" id="ftco-nav">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item active"><a href="@Url.Action("Index","Home")" class="nav-link">Home</a></li>
+                    <li class="nav-item"><a href="@Url.Action("About","Home")" class="nav-link">About</a></li>
+
+                    <!-- Dropdown cho Travelling -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="travellingDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Travelling
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="travellingDropdown">
+                            <a class="dropdown-item" href="@Url.Action("TuTuc", "Travel")">Self-Guided Travel</a>
+                            <a class="dropdown-item" href="@Url.Action("TourNhom", "Travel")">Order Tours</a>
+                        </div>
+                    </li>
+
+                    <li class="nav-item"><a href="@Url.Action("Contact","Home")" class="nav-link">Contact</a></li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("Index","Cart")" title="Cart">
+                            <span class="fa fa-shopping-cart"></span>
+                            <span class="badge badge-primary ml-1" id="cart-count">0</span>
+                        </a>
+                    </li>
+
+                    <!-- Account-->
+
+                    <li class="nav-item dropdown">
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            // === TRẠNG THÁI: ĐÃ ĐĂNG NHẬP ===
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="color: #007bff; font-weight: bold;">
+                                <i class="fa fa-user-circle"></i> Xin chào, @(Session["FullName"] ?? User.Identity.Name)
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="userDropdown">
+                                <a class="dropdown-item" href="@Url.Action("Profile", "Account")">
+                                    <i class="fa fa-id-card mr-2"></i> Thông tin tài khoản
+                                </a>
+
+                                <a class="dropdown-item" href="@Url.Action("SaveTours", "Account")">
+                                    <i class="fa fa-heart mr-2"></i> Các tour đã lưu
+                                </a>
+
+                                <a class="dropdown-item" href="@Url.Action("BookingHistory", "Account")">
+                                    <i class="fa fa-history mr-2"></i> Lịch sử đặt vé
+                                </a>
+
+                                <div class="dropdown-divider"></div>
+
+                                <a class="dropdown-item text-danger" href="@Url.Action("Logout", "Account")">
+                                    <i class="fa fa-sign-out mr-2"></i> Đăng xuất
+                                </a>
+                            </div>
+                        </li>
+                    }
+                    else
+                    {
+                        // === TRẠNG THÁI: CHƯA ĐĂNG NHẬP ===
+                        <li class="nav-item">
+                            <a class="nav-link" href="@Url.Action("Register", "Account")"><i class="fa fa-user-plus"></i> Đăng Ký</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link btn btn-primary text-white px-3 ml-2" href="@Url.Action("Login", "Account")" style="border-radius: 20px;">
+                                <i class="fa fa-sign-in"></i> Đăng Nhập
+                            </a>
+                        </li>
+                    }
+                       
+                    </ul>
+            </div>
+        </div>
+    </nav>
+
+    @* Main content from views will be injected here *@
+    @RenderBody()
+
+    <footer class="ftco-footer bg-bottom ftco-no-pt" style="background-image: url('@Url.Content("~/Content/pacific-main/images/bg_3.jpg")');">
+        <div class="container">
+            <div class="row mb-5">
+                <div class="col-md pt-5">
+                    <div class="ftco-footer-widget pt-md-5 mb-4">
+                        <h2 class="ftco-heading-2">About us</h2>
+                        <p>Your travel company's address and information.Your travel company's address and information..</p>
+                        <ul class="ftco-footer-social list-unstyled float-md-left float-lft">
+                            <li class="ftco-animate"><a href="#"><span class="fa fa-twitter"></span></a></li>
+                            <li class="ftco-animate"><a href="#"><span class="fa fa-facebook"></span></a></li>
+                            <li class="ftco-animate"><a href="#"><span class="fa fa-instagram"></span></a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md pt-5 border-left">
+                    <div class="ftco-footer-widget pt-md-5 mb-4 ml-md-5">
+                        <h2 class="ftco-heading-2">Information</h2>
+                        <ul class="list-unstyled">
+                            <li><a href="#" class="py-2 d-block">Online Enquiry</a></li>
+                            <li><a href="#" class="py-2 d-block">General Enquiries</a></li>
+                            <li><a href="#" class="py-2 d-block">Booking Conditions</a></li>
+                            <li><a href="#" class="py-2 d-block">Privacy and Policy</a></li>
+                            <li><a href="#" class="py-2 d-block">Refund Policy</a></li>
+                            <li><a href="#" class="py-2 d-block">Call Us</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md pt-5 border-left">
+                    <div class="ftco-footer-widget pt-md-5 mb-4">
+                        <h2 class="ftco-heading-2">Experience</h2>
+                        <ul class="list-unstyled">
+                            <li><a href="#" class="py-2 d-block">Adventure</a></li>
+                            <li><a href="#" class="py-2 d-block">Hotel and Restaurant</a></li>
+                            <li><a href="#" class="py-2 d-block">Beach</a></li>
+                            <li><a href="#" class="py-2 d-block">Nature</a></li>
+                            <li><a href="#" class="py-2 d-block">Camping</a></li>
+                            <li><a href="#" class="py-2 d-block">Party</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md pt-5 border-left">
+                    <div class="ftco-footer-widget pt-md-5 mb-4">
+                        <h2 class="ftco-heading-2">Do you have any questions?</h2>
+                        <div class="block-23 mb-3">
+                            <ul>
+                                <li><span class="icon fa fa-map-marker"></span><span class="text">203 Fake St. Mountain View, San Francisco, California, USA</span></li>
+                                <li><a href="#"><span class="icon fa fa-phone"></span><span class="text">+2 392 3929 210</span></a></li>
+                                <li><a href="#"><span class="icon fa fa-paper-plane"></span><span class="text">info@yourdomain.com</span></a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    <p>
+                        Bản quyền &copy;
+                        <script>document.write(new Date().getFullYear());</script> Bảo lưu mọi quyền | Thiết kế bởi <i class="fa fa-heart" aria-hidden="true"></i> <a href="https://colorlib.com" target="_blank">Colorlib</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <div id="ftco-loader" class="show fullscreen"><svg class="circular" width="48px" height="48px"><circle class="path-bg" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke="#eeeeee" /><circle class="path" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke-miterlimit="10" stroke="#F96D00" /></svg></div>
+
+    <script src="@Url.Content("~/Content/pacific-main/js/jquery.min.js")"></script>
+    <script src="@Url.Content("~/Content/pacific-main/js/jquery-migrate-3.0.1.min.js")"></script>
+    <script src="@Url.Content("~/Content/pacific-main/js/popper.min.js")"></script>
+    <script src="@Url.Content("~/Content/pacific-main/js/bootstrap.min.js")"></script>
+    <script src="@Url.Content("~/Content/pacific-main/js/jquery.easing.1.3.js")"></script>
+    <script src="@Url.Content("~/Content/pacific-main/js/jquery.waypoints.min.js")"></script>
+    <script src="@Url.Content("~/Content/pacific-main/js/jquery.stellar.min.js")"></script>
+    <script src="@Url.Content("~/Content/pacific-main/js/owl.carousel.min.js")"></script>
+    <script src="@Url.Content("~/Content/pacific-main/js/jquery.magnific-popup.min.js")"></script>
+    <script src="@Url.Content("~/Content/pacific-main/js/jquery.animateNumber.min.js")"></script>
+    <script src="@Url.Content("~/Content/pacific-main/js/bootstrap-datepicker.js")"></script>
+    <script src="@Url.Content("~/Content/pacific-main/js/scrollax.min.js")"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBVWaKrjvy3MaE7SQ74_uJiULgl1JY0H2s&sensor=false"></script>
+    <script src="@Url.Content("~/Content/pacific-main/js/google-map.js")"></script>
+    <script src="@Url.Content("~/Content/pacific-main/js/main.js")"></script>
+
+
+    <script>
+        $(document).ready(function () {
+            // Bootstrap đã xử lý dropdown mặc định, nhưng nếu muốn tùy chỉnh click outside để đóng
+            $(document).click(function (e) {
+                if (!$(e.target).closest('#ftco-nav').length) {
+                    $('.dropdown-menu').removeClass('show');
+                }
+            });
+
+            // Nếu muốn toggle class 'show' thủ công (tùy chọn, vì Bootstrap đã có)
+            $('#travellingDropdown').click(function (e) {
+                $('.dropdown-menu').toggleClass('show');
+            });
+        });
+    </script>
+
+
+    @RenderSection("scripts", required: false)
+</body>
+</html>

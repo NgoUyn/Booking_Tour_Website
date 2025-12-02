@@ -1,0 +1,66 @@
+﻿@model Tour_Website.ViewModels.LoginViewModel
+
+@{
+    ViewBag.Title = "Đăng Nhập";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<section class="ftco-section contact-section ftco-no-pb" id="login-section">
+    <div class="container">
+        <div class="row justify-content-center mb-5 pb-3">
+            <div class="col-md-7 heading-section text-center">
+                <h2 class="mb-4">Đăng Nhập</h2>
+            </div>
+        </div>
+
+        <div class="row block-9 justify-content-center">
+            <div class="col-md-6 d-flex">
+                @using (Html.BeginForm("Login", "Account", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { @class = "bg-light p-5 contact-form", role = "form" }))
+                {
+                    @Html.AntiForgeryToken()
+
+                    @* Hiển thị thông báo thành công *@
+                    if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+                    }
+
+                    @* Hiển thị lỗi validation *@
+                    if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-danger">
+                            @Html.ValidationSummary(true, "Đăng nhập không thành công.", new { @class = "text-danger" })
+                        </div>
+                    }
+
+                    <div class="form-group">
+                        @Html.LabelFor(m => m.Email)
+                        @Html.TextBoxFor(m => m.Email, new { @class = "form-control", placeholder = "Email của bạn" })
+                        @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(m => m.Password)
+                        @Html.PasswordFor(m => m.Password, new { @class = "form-control", placeholder = "Mật khẩu" })
+                        @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="form-group">
+                        <div class="form-check">
+                            @Html.CheckBoxFor(m => m.RememberMe, new { @class = "form-check-input" })
+                            @Html.LabelFor(m => m.RememberMe, new { @class = "form-check-label ml-2" })
+                        </div>
+                    </div>
+
+                    <div class="form-group text-center">
+                        <input type="submit" value="Đăng Nhập" class="btn btn-primary py-3 px-5">
+                    </div>
+
+                    <div class="text-center mt-3">
+                        <a href="@Url.Action("Register", "Account")">Chưa có tài khoản? Đăng ký mới</a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,36 @@
+﻿
+@{
+    ViewBag.Title = "Self-Guided Travel";
+    var db = new Tour_Website.Models.TourProject_Database(); // DbContext
+    var places = db.Places.ToList();
+}
+<h2>Self-Guided Travel</h2>
+<p>Explore destinations at your own pace with personalized itineraries and flexible options.</p>
+
+<div id="map" style="height: 400px;"></div> <!-- Use google-map.js to plot places -->
+
+@*<div class="row">
+    @foreach (var place in places)
+    {
+        <div class="col-md-4">
+            <div class="card">
+                <img src="@place.AvatarUrl" class="card-img-top" alt="@place.Name">
+                <div class="card-body">
+                    <h5 class="card-title">@place.Name</h5>
+                    <p class="card-text">@place.Description</p>
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <a href="@Url.Action("AddFavorite", "Account", new { placeId = place.PlaceID })" class="btn btn-primary">Save Favorite</a>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section scripts {
+    <script>// Initialize map with places (use google-map.js)
+        function initMap() {
+            // Plot places lat/long
+        }</script>
+}*@

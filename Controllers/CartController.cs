@@ -1,0 +1,22 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using Tour_Website.Models;
+using Tour_Website.ViewModels;
+using Tour_Website.DAL;
+using System.Web.Mvc;
+
+
+namespace Tour_Website.Controllers
+{
+    public class CartController
+    {
+
+        private TourProject_Database db = new TourProject_Database();
+        private UserDAO userDAO = new UserDAO();
+
+     
+
+    }
+}
