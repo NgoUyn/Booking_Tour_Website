@@ -1,4 +1,4 @@
-namespace Tour_Website.Models
+namespace Tour_Website.Models.Entities
 {
     using System;
     using System.Collections.Generic;

@@ -3,15 +3,18 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Entity;
 using System.Linq;
 
-namespace Tour_Website.Models
+namespace Tour_Website.Models.Entities
 {
-    public partial class TourProject_Database : DbContext
+    public partial class TourProject_Database1 : DbContext
     {
-        public TourProject_Database()
+        public TourProject_Database1()
             : base("name=TourProject_Database1")
         {
         }
 
+        public virtual DbSet<AdminRole> AdminRoles { get; set; }
+        public virtual DbSet<AdminStaff> AdminStaffs { get; set; }
+        public virtual DbSet<AuditLog> AuditLogs { get; set; }
         public virtual DbSet<Cart> Carts { get; set; }
         public virtual DbSet<CartItem> CartItems { get; set; }
         public virtual DbSet<Category> Categories { get; set; }
@@ -23,6 +26,7 @@ namespace Tour_Website.Models
         public virtual DbSet<Review> Reviews { get; set; }
         public virtual DbSet<Route> Routes { get; set; }
         public virtual DbSet<RoutePoint> RoutePoints { get; set; }
+        public virtual DbSet<sysdiagram> sysdiagrams { get; set; }
         public virtual DbSet<Tour> Tours { get; set; }
         public virtual DbSet<TourItinerary> TourItineraries { get; set; }
         public virtual DbSet<TourPlace> TourPlaces { get; set; }
@@ -32,6 +36,11 @@ namespace Tour_Website.Models
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<AdminRole>()
+                .HasMany(e => e.AdminStaffs)
+                .WithRequired(e => e.AdminRole)
+                .WillCascadeOnDelete(false);
+
             modelBuilder.Entity<CartItem>()
                 .Property(e => e.UnitPrice)
                 .HasPrecision(12, 2);

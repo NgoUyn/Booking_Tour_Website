@@ -151,6 +151,9 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\Entities\AdminRole.cs" />
+    <Compile Include="Models\Entities\AdminStaff.cs" />
+    <Compile Include="Models\Entities\AuditLog.cs" />
     <Compile Include="Models\Entities\Cart.cs" />
     <Compile Include="Models\Entities\CartItem.cs" />
     <Compile Include="Models\Entities\Category.cs" />
@@ -162,10 +165,11 @@
     <Compile Include="Models\Entities\Review.cs" />
     <Compile Include="Models\Entities\Route.cs" />
     <Compile Include="Models\Entities\RoutePoint.cs" />
+    <Compile Include="Models\Entities\sysdiagram.cs" />
     <Compile Include="Models\Entities\Tour.cs" />
     <Compile Include="Models\Entities\TourItinerary.cs" />
     <Compile Include="Models\Entities\TourPlace.cs" />
-    <Compile Include="Models\TourProject_Database.cs" />
+    <Compile Include="Models\TourProject_Database1.cs" />
     <Compile Include="Models\Entities\User.cs" />
     <Compile Include="Models\Entities\UserLocation.cs" />
     <Compile Include="Models\Entities\Voucher.cs" />

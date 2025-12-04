@@ -1,9 +1,58 @@
 ﻿@model Tour_Website.ViewModels.RegisterViewModel
-
 @{
-    ViewBag.Title = "Đăng Ký Tài Khoản";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+	ViewBag.Title = "Đăng Ký Tài Khoản";
+	Layout = "~/Views/Shared/_Layout.cshtml";
 }
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+	.register-wrapper {
+		min-height: 80vh;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-family: 'Poppins', sans-serif;
+		background: linear-gradient(135deg, #f5f7fb, #e2e8f0);
+		padding: 2rem;
+	}
+	.register-card {
+		width: 100%;
+		max-width: 640px;
+		background: #fff;
+		border-radius: 1.5rem;
+		padding: 2rem;
+		box-shadow: 0 30px 60px rgba(15, 23, 42, 0.1);
+	}
+	.register-card h2 {
+		font-weight: 600;
+		margin-bottom: 0.5rem;
+	}
+	.register-card p {
+		color: #475569;
+		margin-bottom: 1.5rem;
+	}
+	.form-grid {
+		display: grid;
+		gap: 1rem;
+		grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+		margin-bottom: 1rem;
+	}
+	.btn-primary {
+		border-radius: 999px;
+		padding: 0.85rem 1.5rem;
+		font-weight: 600;
+		width: 100%;
+	}
+	generated .form-control:focus {
+		box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+	}
+	.validation-summary-errors {
+		background: #ffe4e6;
+		border-radius: 0.75rem;
+		padding: 0.9rem 1rem;
+		color: #b91c1c;
+		margin-bottom: 1rem;
+	}
+</style>
 
 <section class="ftco-section contact-section ftco-no-pb" id="contact-section">
     <div class="container">
@@ -16,49 +65,58 @@
 
         <div class="row block-9 justify-content-center">
             <div class="col-md-6 order-md-last d-flex">
-                @using (Html.BeginForm("Register", "Account", FormMethod.Post, new { @class = "bg-light p-5 contact-form", role = "form" }))
-                {
-                    @Html.AntiForgeryToken()
+                <div class="register-wrapper">
+					<div class="register-card">
+						<h2>Tạo tài khoản</h2>
+						<p>Đăng ký để khám phá tour tự túc và lưu lại các địa điểm yêu thích.</p>
+						@using (Html.BeginForm("Register", "Account", FormMethod.Post, new { @class = "needs-validation", novalidate = "novalidate" }))
+						{
+							@Html.AntiForgeryToken()
+							@Html.ValidationSummary(true, "", new { @class = "validation-summary-errors" })
 
-                    if (!ViewData.ModelState.IsValid)
-                    {
-                        <div class="alert alert-danger">
-                            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-                        </div>
-                    }
+							<div class="form-grid">
+								<div class="form-group">
+									<label asp-for="UserName">Họ và tên</label>
+									@Html.TextBoxFor(m => m.UserName, new { @class = "form-control", placeholder = "Nguyễn Văn A" })
+									@Html.ValidationMessageFor(m => m.UserName, "", new { @class = "text-danger small" })
+								</div>
+								<div class="form-group">
+									<label asp-for="Email">Email</label>
+									@Html.TextBoxFor(m => m.Email, new { @class = "form-control", placeholder = "email@domain.com" })
+									@Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger small" })
+								</div>
+							</div>
 
-                    <div class="form-group">
-                        @Html.LabelFor(m => m.UserName)
-                        @Html.TextBoxFor(m => m.UserName, new { @class = "form-control", placeholder = "Nhập tên hiển thị" })
-                        @Html.ValidationMessageFor(m => m.UserName, "", new { @class = "text-danger" })
-                    </div>
+							<div class="form-grid">
+								<div class="form-group">
+									<label asp-for="BirthDate">Ngày sinh</label>
+									@Html.TextBoxFor(m => m.BirthDate, "{0:yyyy-MM-dd}", new { @type = "date", @class = "form-control" })
+									@Html.ValidationMessageFor(m => m.BirthDate, "", new { @class = "text-danger small" })
+								</div>
+								<div class="form-group">
+									<label asp-for="Phone">Số điện thoại</label>
+									@Html.TextBoxFor(m => m.Phone, new { @class = "form-control", placeholder = "0999 888 777" })
+									@Html.ValidationMessageFor(m => m.Phone, "", new { @class = "text-danger small" })
+								</div>
+							</div>
 
-                    <div class="form-group">
-                        @Html.LabelFor(m => m.Email)
-                        @Html.TextBoxFor(m => m.Email, new { @class = "form-control", placeholder = "Nhập địa chỉ Email" })
-                        @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
-                    </div>
+							<div class="form-grid">
+								<div class="form-group">
+									<label asp-for="Password">Mật khẩu</label>
+									@Html.PasswordFor(m => m.Password, new { @class = "form-control", placeholder = "••••••••" })
+									@Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger small" })
+								</div>
+								<div class="form-group">
+									<label asp-for="ConfirmPassword">Xác nhận mật khẩu</label>
+									@Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-control", placeholder = "••••••••" })
+									@Html.ValidationMessageFor(m => m.ConfirmPassword, "", new { @class = "text-danger small" })
+								</div>
+							</div>
 
-                    <div class="form-group">
-                        @Html.LabelFor(m => m.Password)
-                        @Html.PasswordFor(m => m.Password, new { @class = "form-control", placeholder = "Nhập mật khẩu" })
-                        @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
-                    </div>
-
-                    <div class="form-group">
-                        @Html.LabelFor(m => m.ConfirmPassword)
-                        @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-control", placeholder = "Nhập lại mật khẩu" })
-                        @Html.ValidationMessageFor(m => m.ConfirmPassword, "", new { @class = "text-danger" })
-                    </div>
-
-                    <div class="form-group text-center">
-                        <input type="submit" value="Đăng Ký Ngay" class="btn btn-primary py-3 px-5">
-                    </div>
-
-                    <div class="text-center mt-3">
-                        <a href="@Url.Action("Login", "Account")">Đã có tài khoản? Đăng nhập tại đây</a>
-                    </div>
-                }
+							<button type="submit" class="btn btn-primary mt-3">Đăng ký</button>
+						}
+					</div>
+				</div>
             </div>
         </div>
     </div>

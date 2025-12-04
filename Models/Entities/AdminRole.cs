@@ -6,27 +6,23 @@ namespace Tour_Website.Models.Entities
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Data.Entity.Spatial;
 
-    [Table("Route")]
-    public partial class Route
+    [Table("AdminRole")]
+    public partial class AdminRole
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public Route()
+        public AdminRole()
         {
-            RoutePoints = new HashSet<RoutePoint>();
+            AdminStaffs = new HashSet<AdminStaff>();
         }
 
-        public int RouteID { get; set; }
+        [Key]
+        public int RoleID { get; set; }
 
-        public int? UserID { get; set; }
-
-        [StringLength(255)]
-        public string RouteName { get; set; }
-
-        public DateTimeOffset? CreatedAt { get; set; }
-
-        public virtual User User { get; set; }
+        [Required]
+        [StringLength(50)]
+        public string RoleName { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<RoutePoint> RoutePoints { get; set; }
+        public virtual ICollection<AdminStaff> AdminStaffs { get; set; }
     }
 }

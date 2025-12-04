@@ -1,4 +1,4 @@
-namespace Tour_Website.Models
+namespace Tour_Website.Models.Entities
 {
     using System;
     using System.Collections.Generic;
@@ -59,6 +59,8 @@ namespace Tour_Website.Models
         public DateTime? CreatedAt { get; set; }
 
         public bool? IsActive { get; set; }
+
+        public bool AllowStaffEdit { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Cart> Carts { get; set; }
