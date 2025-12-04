@@ -143,6 +143,7 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\AccountController.cs" />
+    <Compile Include="Controllers\AdminController.cs" />
     <Compile Include="Controllers\CartController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\TravelController.cs" />
@@ -172,6 +173,8 @@
     <Compile Include="ViewModels\LoginViewModel.cs" />
     <Compile Include="ViewModels\ProfileViewModel.cs" />
     <Compile Include="ViewModels\RegisterViewModel.cs" />
+    <Compile Include="ViewModels\TourNhomViewModel.cs" />
+    <Compile Include="ViewModels\TuTucViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include=".gitignore" />
@@ -191,18 +194,6 @@
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="Content\bootstrap.rtl.css" />
     <Content Include="Content\bootstrap.rtl.min.css" />
-    <Content Include="Content\css\ajax-loader.gif" />
-    <Content Include="Content\css\animate.css" />
-    <Content Include="Content\css\bootstrap-datepicker.css" />
-    <Content Include="Content\css\bootstrap.min.css" />
-    <Content Include="Content\css\bootstrap\bootstrap-grid.css" />
-    <Content Include="Content\css\bootstrap\bootstrap-reboot.css" />
-    <Content Include="Content\css\flaticon.css" />
-    <Content Include="Content\css\jquery.timepicker.css" />
-    <Content Include="Content\css\magnific-popup.css" />
-    <Content Include="Content\css\owl.carousel.min.css" />
-    <Content Include="Content\css\owl.theme.default.min.css" />
-    <Content Include="Content\css\style.css" />
     <Content Include="Content\images\about-1.jpg" />
     <Content Include="Content\images\about.jpg" />
     <Content Include="Content\images\bg_1.jpg" />
@@ -247,10 +238,40 @@
     <Content Include="Content\images\place-3.jpg" />
     <Content Include="Content\images\place-4.jpg" />
     <Content Include="Content\images\place-5.jpg" />
+    <Content Include="Content\images\PlaceImage\1.jpg" />
+    <Content Include="Content\images\PlaceImage\10.jpg" />
+    <Content Include="Content\images\PlaceImage\11.jpg" />
+    <Content Include="Content\images\PlaceImage\12.jpg" />
+    <Content Include="Content\images\PlaceImage\13.jpg" />
+    <Content Include="Content\images\PlaceImage\14.jpg" />
+    <Content Include="Content\images\PlaceImage\15.jpg" />
+    <Content Include="Content\images\PlaceImage\2.jpg" />
+    <Content Include="Content\images\PlaceImage\3.jpg" />
+    <Content Include="Content\images\PlaceImage\4.jpg" />
+    <Content Include="Content\images\PlaceImage\5.jpg" />
+    <Content Include="Content\images\PlaceImage\6.jpg" />
+    <Content Include="Content\images\PlaceImage\7.jpg" />
+    <Content Include="Content\images\PlaceImage\8.jpg" />
+    <Content Include="Content\images\PlaceImage\9.jpg" />
     <Content Include="Content\images\services-1.jpg" />
     <Content Include="Content\images\services-2.jpg" />
     <Content Include="Content\images\services-3.jpg" />
     <Content Include="Content\images\services-4.jpg" />
+    <Content Include="Content\images\Tour\T1.jpg" />
+    <Content Include="Content\images\Tour\T10.jpg" />
+    <Content Include="Content\images\Tour\T11.jpg" />
+    <Content Include="Content\images\Tour\T12.jpg" />
+    <Content Include="Content\images\Tour\T13.jpg" />
+    <Content Include="Content\images\Tour\T14.jpg" />
+    <Content Include="Content\images\Tour\T15.jpg" />
+    <Content Include="Content\images\Tour\T2.jpg" />
+    <Content Include="Content\images\Tour\T3.jpg" />
+    <Content Include="Content\images\Tour\T4.jpg" />
+    <Content Include="Content\images\Tour\T5.jpg" />
+    <Content Include="Content\images\Tour\T6.jpg" />
+    <Content Include="Content\images\Tour\T7.jpg" />
+    <Content Include="Content\images\Tour\T8.jpg" />
+    <Content Include="Content\images\Tour\T9.jpg" />
     <Content Include="Content\pacific-main\about.html" />
     <Content Include="Content\pacific-main\blog-single.html" />
     <Content Include="Content\pacific-main\blog.html" />
@@ -340,6 +361,7 @@
     <Content Include="Content\pacific-main\js\scrollax.min.js" />
     <Content Include="Content\pacific-main\main.html" />
     <Content Include="Content\pacific-main\readme.txt" />
+    <Content Include="Content\TuTuc.css" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="Content\Site.css" />
@@ -349,7 +371,6 @@
     <Content Include="Scripts\bootstrap.esm.min.js" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
-    <Content Include="Content\css\.DS_Store" />
     <Content Include="Content\images\.DS_Store" />
     <Content Include="Content\scss\.DS_Store" />
     <Content Include="Content\scss\bootstrap\.DS_Store" />
@@ -600,6 +621,7 @@
     <Content Include="Views\Account\Profile.cshtml" />
     <Content Include="Views\Account\SaveTours.cshtml" />
     <Content Include="Views\Account\BookingHistory.cshtml" />
+    <Content Include="Views\Admin\Dashboard.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

@@ -21,89 +21,138 @@
     <link rel="stylesheet" href="@Url.Content("~/Content/pacific-main/css/jquery.timepicker.css")">
     <link rel="stylesheet" href="@Url.Content("~/Content/pacific-main/css/flaticon.css")">
     <link rel="stylesheet" href="@Url.Content("~/Content/pacific-main/css/style.css")">
+    <style>
+        .custom-navbar {
+            background: rgba(0, 0, 0, 0.75);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0.8rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1050;
+        }
+
+        .custom-navbar .navbar-brand {
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .custom-navbar .nav-link {
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            transition: color 0.2s ease;
+            font-family: "Poppins", sans-serif;
+        }
+
+        .custom-navbar .nav-link:hover,
+        .custom-navbar .nav-link.active {
+            color: #ff7a18 !important;
+        }
+
+        .custom-navbar .btn-pill {
+            border-radius: 25px;
+            padding: 0.45rem 1.6rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .custom-navbar.scrolled {
+            background: rgba(10, 10, 10, 0.95);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+            transition: background 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .custom-navbar .navbar-nav {
+            gap: 1rem;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .nav-actions .cart-link {
+            position: relative;
+            font-size: 1.1rem;
+            color: #fff;
+        }
+
+        .nav-actions #cart-count {
+            top: -6px;
+            right: -10px;
+            position: absolute;
+            min-width: 22px;
+            height: 22px;
+            font-size: 0.7rem;
+        }
+    </style>
     @RenderSection("head", required: false)
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark ftco_navbar bg-dark ftco-navbar-light" id="ftco-navbar">
-        <div class="container">
-            <a class="navbar-brand" href="@Url.Action("Index","Home")">Pacific<span>Travel Agency</span></a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav" aria-controls="ftco-nav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="oi oi-menu"></span> Menu
-            </button>
+	<nav class="navbar navbar-expand-lg navbar-dark custom-navbar">
+		<div class="container">
+			<a class="navbar-brand text-white" href="@Url.Action("Index","Home")">
+				Pacific<span class="text-warning">Travel</span>
+			</a>
+			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav" aria-controls="ftco-nav" aria-expanded="false" aria-label="Toggle navigation">
+				<span class="oi oi-menu"></span>
+			</button>
 
-            <div class="collapse navbar-collapse" id="ftco-nav">
-                <ul class="navbar-nav ml-auto">
-                    <li class="nav-item active"><a href="@Url.Action("Index","Home")" class="nav-link">Home</a></li>
-                    <li class="nav-item"><a href="@Url.Action("About","Home")" class="nav-link">About</a></li>
+			<div class="collapse navbar-collapse justify-content-center" id="ftco-nav">
+				<ul class="navbar-nav mx-auto">
+					<li class="nav-item active">
+						<a href="@Url.Action("Index","Home")" class="nav-link">Home</a>
+					</li>
+					<li class="nav-item">
+						<a href="@Url.Action("About","Home")" class="nav-link">About</a>
+					</li>
+					<li class="nav-item dropdown">
+						<a class="nav-link dropdown-toggle" href="#" id="travellingDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+							Travelling
+						</a>
+						<div class="dropdown-menu text-uppercase" aria-labelledby="travellingDropdown">
+							<a class="dropdown-item" href="@Url.Action("TuTuc", "Travel")">Self-Guided Travel</a>
+							<a class="dropdown-item" href="@Url.Action("TourNhom", "Travel")">Order Tours</a>
+						</div>
+					</li>
+					<li class="nav-item">
+						<a href="@Url.Action("Contact","Home")" class="nav-link">Contact</a>
+					</li>
+				</ul>
+			</div>
 
-                    <!-- Dropdown cho Travelling -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="travellingDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Travelling
-                        </a>
-                        <div class="dropdown-menu" aria-labelledby="travellingDropdown">
-                            <a class="dropdown-item" href="@Url.Action("TuTuc", "Travel")">Self-Guided Travel</a>
-                            <a class="dropdown-item" href="@Url.Action("TourNhom", "Travel")">Order Tours</a>
-                        </div>
-                    </li>
-
-                    <li class="nav-item"><a href="@Url.Action("Contact","Home")" class="nav-link">Contact</a></li>
-
-                    <li class="nav-item">
-                        <a class="nav-link" href="@Url.Action("Index","Cart")" title="Cart">
-                            <span class="fa fa-shopping-cart"></span>
-                            <span class="badge badge-primary ml-1" id="cart-count">0</span>
-                        </a>
-                    </li>
-
-                    <!-- Account-->
-
-                    <li class="nav-item dropdown">
-                        @if (User.Identity.IsAuthenticated)
-                        {
-                            // === TRẠNG THÁI: ĐÃ ĐĂNG NHẬP ===
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="color: #007bff; font-weight: bold;">
-                                <i class="fa fa-user-circle"></i> Xin chào, @(Session["FullName"] ?? User.Identity.Name)
-                            </a>
-                            <div class="dropdown-menu" aria-labelledby="userDropdown">
-                                <a class="dropdown-item" href="@Url.Action("Profile", "Account")">
-                                    <i class="fa fa-id-card mr-2"></i> Thông tin tài khoản
-                                </a>
-
-                                <a class="dropdown-item" href="@Url.Action("SaveTours", "Account")">
-                                    <i class="fa fa-heart mr-2"></i> Các tour đã lưu
-                                </a>
-
-                                <a class="dropdown-item" href="@Url.Action("BookingHistory", "Account")">
-                                    <i class="fa fa-history mr-2"></i> Lịch sử đặt vé
-                                </a>
-
-                                <div class="dropdown-divider"></div>
-
-                                <a class="dropdown-item text-danger" href="@Url.Action("Logout", "Account")">
-                                    <i class="fa fa-sign-out mr-2"></i> Đăng xuất
-                                </a>
-                            </div>
-                        </li>
-                    }
-                    else
-                    {
-                        // === TRẠNG THÁI: CHƯA ĐĂNG NHẬP ===
-                        <li class="nav-item">
-                            <a class="nav-link" href="@Url.Action("Register", "Account")"><i class="fa fa-user-plus"></i> Đăng Ký</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link btn btn-primary text-white px-3 ml-2" href="@Url.Action("Login", "Account")" style="border-radius: 20px;">
-                                <i class="fa fa-sign-in"></i> Đăng Nhập
-                            </a>
-                        </li>
-                    }
-                       
-                    </ul>
-            </div>
-        </div>
-    </nav>
+			<div class="d-flex align-items-center nav-actions">
+				<a class="nav-link position-relative text-white pr-3 cart-link" href="@Url.Action("Index","Cart")" title="Cart">
+					<span class="fa fa-shopping-cart"></span>
+					<span class="badge badge-pill badge-warning position-absolute" id="cart-count" style="top: -6px; right: -12px;">0</span>
+				</a>
+				@if (User.Identity.IsAuthenticated)
+				{
+					<div class="dropdown">
+						<button class="btn btn-outline-light btn-pill dropdown-toggle" type="button" id="userMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+							<i class="fa fa-user-circle-o"></i> @(Session["UserEmail"] ?? User.Identity.Name)
+						</button>
+						<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenuButton">
+							<li><a class="dropdown-item" href="@Url.Action("Profile", "Account")"><i class="fa fa-id-card mr-2"></i>Thông tin tài khoản</a></li>
+							<li><a class="dropdown-item" href="@Url.Action("SaveTours", "Account")"><i class="fa fa-heart mr-2"></i>Địa điểm yêu thích</a></li>
+							<li><hr class="dropdown-divider"></li>
+							<li><a class="dropdown-item text-danger" href="@Url.Action("Logout", "Account")"><i class="fa fa-sign-out mr-2"></i>Đăng xuất</a></li>
+						</ul>
+					</div>
+				}
+				else
+				{
+					<a class="btn btn-outline-light btn-pill me-2" href="@Url.Action("Register", "Account")">
+						<i class="fa fa-user-plus"></i> Register
+					</a>
+					<a class="btn btn-warning btn-pill text-white" href="@Url.Action("Login", "Account")">
+						<i class="fa fa-sign-in"></i> Login
+					</a>
+				}
+			</div>
+		</div>
+	</nav>
 
     @* Main content from views will be injected here *@
     @RenderBody()

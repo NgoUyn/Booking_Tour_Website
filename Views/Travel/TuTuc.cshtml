@@ -1,36 +1,475 @@
-﻿
+﻿@using Newtonsoft.Json;
+@model Tour_Website.ViewModels.TuTucViewModel
+
 @{
-    ViewBag.Title = "Self-Guided Travel";
-    var db = new Tour_Website.Models.TourProject_Database(); // DbContext
-    var places = db.Places.ToList();
+    ViewBag.Title = "Self-Guided Travel - TuTuc";
 }
-<h2>Self-Guided Travel</h2>
+<link href="~/Content/TuTuc.css" rel="stylesheet" />
+<style>
+	.places-header {
+		display: flex;
+		justify-content: flex-end;
+		align-items: center;
+		gap: 0.75rem;
+		padding: 0 12px 10px;
+	}
+
+	.places-controls {
+		display: flex;
+		width: 100%;
+		align-items: center;
+		gap: 0.75rem;
+	}
+
+	.places-controls .search-input {
+		position: relative;
+		flex: 1.2;
+		display: flex;
+		align-items: stretch;
+		gap: 0.35rem;
+	}
+
+	.places-controls .search-input input {
+		flex: 1;
+	}
+
+	.filter-section {
+		flex: 0 0 auto;
+		min-width: 220px;
+	}
+
+	.filter-section select {
+		width: 100%;
+	}
+
+	.modal-gallery {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		margin-bottom: 1rem;
+	}
+
+	.modal-gallery img {
+		width: 64px;
+		height: 64px;
+		object-fit: cover;
+		border-radius: 8px;
+		cursor: pointer;
+		border: 2px solid transparent;
+	}
+
+	.modal-gallery img:hover {
+		border-color: #007bff;
+	}
+
+	.search-suggestions {
+		position: absolute;
+		top: calc(100% + 6px);
+		left: 0;
+		right: 0;
+		min-height: 0;
+		max-height: 220px;
+		background: #fff;
+		border: 1px solid #dee2e6;
+		border-radius: 0.35rem;
+		box-shadow: 0 8px 18px rgba(0,0,0,0.15);
+		overflow-y: auto;
+		display: none;
+		z-index: 20;
+	}
+
+	.search-suggestions.visible {
+		display: block;
+	}
+
+	.search-suggestions button {
+		width: 100%;
+		border: none;
+		background: transparent;
+		text-align: left;
+		padding: 0.5rem 0.65rem;
+		font-size: 0.9rem;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		cursor: pointer;
+	}
+
+	.search-suggestions button:hover {
+		background: #f1f5f9;
+	}
+</style>
+
+<h2><i class="fas fa-map-marked-alt me-2"></i>Self-Guided Travel</h2>
 <p>Explore destinations at your own pace with personalized itineraries and flexible options.</p>
 
-<div id="map" style="height: 400px;"></div> <!-- Use google-map.js to plot places -->
+<div class="tutuc-container">
+	<div class="map-section">
+		<div class="map-controls">
+			<button id="locateBtn" class="btn btn-primary btn-sm">
+				<i class="fas fa-location-arrow me-1"></i>Find My Location
+			</button>
+		</div>
+		<div id="map"></div>
+	</div>
 
-@*<div class="row">
-    @foreach (var place in places)
-    {
-        <div class="col-md-4">
-            <div class="card">
-                <img src="@place.AvatarUrl" class="card-img-top" alt="@place.Name">
-                <div class="card-body">
-                    <h5 class="card-title">@place.Name</h5>
-                    <p class="card-text">@place.Description</p>
-                    @if (User.Identity.IsAuthenticated)
-                    {
-                        <a href="@Url.Action("AddFavorite", "Account", new { placeId = place.PlaceID })" class="btn btn-primary">Save Favorite</a>
-                    }
-                </div>
+	<div class="places-section">
+		<div class="places-header">
+			<div class="places-controls">
+				<div class="search-input">
+					<input type="text" id="searchInput" placeholder="Search places..." class="form-control form-control-sm">
+					<button id="searchBtn" class="btn btn-outline-secondary btn-sm">Search</button>
+					<div class="search-suggestions" id="searchSuggestions" role="listbox" aria-label="Suggested places"></div>
+				</div>
+				<div class="filter-section">
+					<select id="categoryFilter" class="form-select form-select-sm">
+						<option value="all">All Categories</option>
+						@foreach (var category in Model.Categories)
+						{
+							<option value="@category.Slug">@category.Name</option>
+						}
+					</select>
+				</div>
+			</div>
+		</div>
+
+		<div class="places-list" id="placesList">
+			<div class="loading-spinner text-center py-4">
+				<div class="spinner-border text-primary" role="status">
+					<span class="visually-hidden">Loading...</span>
+				</div>
+				<p class="mt-2">Finding places around you...</p>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Place Detail Modal -->
+<div class="modal fade" id="placeModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="placeModalTitle"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="placeModalBody">
             </div>
         </div>
-    }
+    </div>
 </div>
 
 @section scripts {
-    <script>// Initialize map with places (use google-map.js)
-        function initMap() {
-            // Plot places lat/long
-        }</script>
-}*@
+	<!-- Leaflet CSS -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+	<!-- Leaflet JS -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+	<!-- Leaflet GeoSearch Plugin -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet-geosearch/3.11.0/geosearch.css" />
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-geosearch/3.11.0/geosearch.umd.js"></script>
+
+	<script>
+		const serverPlaces = @Html.Raw(JsonConvert.SerializeObject(Model.Places));
+		const placesData = serverPlaces.map(normalizePlacePayload);
+
+		let map;
+		let markers = [];
+		let userMarker = null;
+		let userLocation = null;
+		let currentPlaces = [...placesData];
+		let activePlacesSource = [...placesData];
+
+		const searchInput = document.getElementById('searchInput');
+		const searchBtn = document.getElementById('searchBtn');
+		const categoryFilter = document.getElementById('categoryFilter');
+		const suggestionsContainer = document.getElementById('searchSuggestions');
+		let suggestionTimeout = null;
+
+		function initMap() {
+			const defaultLocation = [10.8231, 106.6297];
+			map = L.map('map').setView(defaultLocation, 15);
+
+			L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+				attribution: '© OpenStreetMap contributors',
+				maxZoom: 19,
+				minZoom: 12
+			}).addTo(map);
+
+			getUserLocation();
+			initializeEventListeners();
+			refreshView(activePlacesSource);
+		}
+
+		function refreshView(source) {
+			const category = categoryFilter.value;
+			const filtered = category === 'all'
+				? [...source]
+				: source.filter(place => place.type === category);
+			currentPlaces = filtered;
+			displayPlacesList(filtered);
+			addMarkersToMap(filtered);
+			updateDistances();
+		}
+
+		function getUserLocation() {
+			if (navigator.geolocation) {
+				navigator.geolocation.getCurrentPosition(
+					(position) => {
+						userLocation = {
+							lat: position.coords.latitude,
+							lng: position.coords.longitude
+						};
+
+						map.setView([userLocation.lat, userLocation.lng], 15);
+						addUserMarker(userLocation);
+						updateDistances();
+					},
+					(error) => {
+						console.error('Geolocation error:', error);
+					},
+					{
+						enableHighAccuracy: true,
+						timeout: 10000,
+						maximumAge: 300000
+					}
+				);
+			}
+		}
+
+		function addUserMarker(location) {
+			if (userMarker) {
+				map.removeLayer(userMarker);
+			}
+
+			userMarker = L.circleMarker([location.lat, location.lng], {
+				radius: 8,
+				fillColor: '#4285f4',
+				color: '#fff',
+				weight: 2,
+				opacity: 1,
+				fillOpacity: 0.8
+			}).addTo(map);
+
+			userMarker.bindPopup('<b>Your Location</b>');
+		}
+
+		function updateDistances() {
+			if (!userLocation) return;
+
+			currentPlaces.forEach(place => {
+				place.distance = calculateDistance(userLocation.lat, userLocation.lng, place.lat, place.lng);
+			});
+			displayPlacesList(currentPlaces);
+		}
+
+		function displayPlacesList(places) {
+			const placesList = document.getElementById('placesList');
+
+			if (places.length === 0) {
+				placesList.innerHTML = '<div class="text-center py-4"><p>No places found.</p></div>';
+				return;
+			}
+
+			placesList.innerHTML = places.map((place, index) => `
+				<div class="place-card" data-place-index="${index}" onclick="selectPlace(${index})">
+					<div class="d-flex">
+						<img src="${place.photo}" alt="${place.name}" class="me-3" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">
+						<div class="flex-grow-1">
+							<div class="place-name">${place.name}</div>
+							<div class="place-rating">
+								<span class="rating-stars">${'★'.repeat(Math.floor(place.rating))}${'☆'.repeat(5-Math.floor(place.rating))}</span>
+								<span class="rating-text">${place.rating.toFixed(1)} (${place.reviews})</span>
+							</div>
+							<div class="place-address">
+								<i class="fas fa-map-marker-alt"></i>
+								${place.address}
+							</div>
+							<div class="place-type">${place.typeName}</div>
+							${place.distance ? `<div class="place-distance">📍 ${place.distance.toFixed(1)} km away</div>` : ''}
+						</div>
+					</div>
+				</div>
+			`).join('');
+		}
+
+		function addMarkersToMap(places) {
+			markers.forEach(marker => map.removeLayer(marker));
+			markers = [];
+
+			places.forEach((place, index) => {
+				const marker = L.marker([place.lat, place.lng]).addTo(map);
+				marker.bindPopup(createPopupContent(place, index));
+				marker.on('click', () => selectPlace(index));
+				markers.push(marker);
+			});
+		}
+
+		function createPopupContent(place, index) {
+			return `
+				<div class="leaflet-popup-content">
+					<img src="${place.photo}" alt="${place.name}" style="width: 100%; height: 80px; object-fit: cover; border-radius: 4px; margin-bottom: 8px;">
+					<h6>${place.name}</h6>
+					<div class="rating">
+						${'★'.repeat(Math.floor(place.rating))}${'☆'.repeat(5-Math.floor(place.rating))} 
+						${place.rating.toFixed(1)}
+					</div>
+					<div class="address">${place.address}</div>
+					<button class="btn btn-primary btn-sm mt-2" onclick="showPlaceDetails(${index})">
+						View Details
+					</button>
+				</div>
+			`;
+		}
+
+		function selectPlace(index) {
+			document.querySelectorAll('.place-card').forEach(card => card.classList.remove('selected'));
+			const selectedCard = document.querySelector(`[data-place-index="${index}"]`);
+			if (selectedCard) {
+				selectedCard.classList.add('selected');
+				selectedCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+			}
+
+			const place = currentPlaces[index];
+			if (place) {
+				map.setView([place.lat, place.lng], 16);
+				markers[index]?.openPopup();
+			}
+		}
+
+		function initializeEventListeners() {
+			document.getElementById('locateBtn').addEventListener('click', getUserLocation);
+			categoryFilter.addEventListener('change', () => refreshView(activePlacesSource));
+			searchBtn.addEventListener('click', performSearch);
+			searchInput.addEventListener('keypress', (e) => {
+				if (e.key === 'Enter') {
+					e.preventDefault();
+					performSearch();
+				}
+			});
+		}
+
+		searchInput.addEventListener('input', () => {
+			clearTimeout(suggestionTimeout);
+			suggestionTimeout = setTimeout(() => fetchSuggestions(searchInput.value.trim()), 220);
+		});
+
+		suggestionsContainer.addEventListener('click', (event) => {
+			const button = event.target.closest('.suggestion-item');
+			if (!button) return;
+			searchInput.value = button.dataset.name || '';
+			clearSuggestions();
+			performSearch();
+		});
+
+		document.addEventListener('click', (event) => {
+			if (!event.target.closest('.search-input')) {
+				clearSuggestions();
+			}
+		});
+
+		async function fetchSuggestions(query) {
+			if (!query) {
+				clearSuggestions();
+				return;
+			}
+			try {
+				const response = await fetch('@Url.Action("SuggestPlaces", "Travel")?term=' + encodeURIComponent(query));
+				if (!response.ok) throw new Error('Failed to fetch suggestions');
+				const list = await response.json();
+				renderSuggestions(list);
+			} catch (error) {
+				console.error(error);
+				clearSuggestions();
+			}
+		}
+
+		function renderSuggestions(items) {
+			if (!items || !items.length) {
+				clearSuggestions();
+				return;
+			}
+			suggestionsContainer.innerHTML = items.map(item => `
+				<button type="button" class="suggestion-item" data-name="${item.name}">
+					<span>${item.name}</span>
+					<small>${item.rating.toFixed(1)} ⭐</small>
+				</button>
+			`).join('');
+			suggestionsContainer.classList.add('visible');
+		}
+
+		function clearSuggestions() {
+			suggestionsContainer.innerHTML = '';
+			suggestionsContainer.classList.remove('visible');
+		}
+
+		function showPlaceDetails(index) {
+			const place = currentPlaces[index];
+			document.getElementById('placeModalTitle').textContent = place.name;
+			document.getElementById('placeModalBody').innerHTML = `
+				${place.imageUrls.length ? `<div class="modal-gallery">${place.imageUrls.map(url => `<img src="${url}" alt="${place.name}">`).join('')}</div>` : ''}
+				<img src="${place.photo}" alt="${place.name}" class="img-fluid rounded mb-3" style="width: 100%; height: 200px; object-fit: cover;">
+				<p><strong>Category:</strong> ${place.typeName}</p>
+				<p><strong>Rating:</strong> ${place.rating}/5 ⭐ (${place.reviews} reviews)</p>
+				<p><strong>Address:</strong> ${place.address}</p>
+				<p><strong>Description:</strong> ${place.description}</p>
+				${userLocation ? `<p><strong>Distance:</strong> ${place.distance?.toFixed(1)} km from your location</p>` : ''}
+				<button class="btn btn-primary" onclick="viewOnMap(${index})">View on Map</button>
+			`;
+			const modal = new bootstrap.Modal(document.getElementById('placeModal'));
+			modal.show();
+		}
+
+		function viewOnMap(index) {
+			const place = currentPlaces[index];
+			map.setView([place.lat, place.lng], 16);
+			selectPlace(index);
+			const modal = bootstrap.Modal.getInstance(document.getElementById('placeModal'));
+			modal?.hide();
+		}
+
+		function calculateDistance(lat1, lon1, lat2, lon2) {
+			const R = 6371;
+			const dLat = (lat2 - lat1) * Math.PI / 180;
+			const dLon = (lon2 - lon1) * Math.PI / 180;
+			const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+				Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+				Math.sin(dLon / 2) * Math.sin(dLon / 2);
+			const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+			return R * c;
+		}
+
+		async function performSearch() {
+			const query = searchInput.value.trim();
+			const url = '@Url.Action("SearchPlaces", "Travel")?query=' + encodeURIComponent(query);
+			try {
+				const response = await fetch(url);
+				if (!response.ok) throw new Error('Search failed');
+				const rawPlaces = await response.json();
+				activePlacesSource = rawPlaces.map(normalizePlacePayload);
+				refreshView(activePlacesSource);
+				clearSuggestions();
+			} catch (error) {
+				console.error(error);
+			}
+		}
+
+		function normalizePlacePayload(place) {
+			return {
+				placeId: place.placeId ?? place.PlaceId ?? 0,
+				name: place.name ?? place.Name ?? 'Unknown place',
+				address: place.address ?? place.Address ?? '',
+				photo: place.photo ?? place.PhotoUrl ?? 'https://via.placeholder.com/100',
+				description: place.description ?? place.Description ?? '',
+				type: place.type ?? place.CategorySlug ?? 'other',
+				typeName: place.typeName ?? place.CategoryName ?? 'Place',
+				rating: place.rating ?? place.Rating ?? 0,
+				reviews: place.reviews ?? place.Reviews ?? 0,
+				lat: place.lat ?? place.Latitude ?? 0,
+				lng: place.lng ?? place.Longitude ?? 0,
+				distance: place.distance ?? place.Distance ?? null,
+				imageUrls: place.imageUrls ?? place.ImageUrls ?? []
+			};
+		}
+
+		window.addEventListener('load', initMap);
+	</script>
+}

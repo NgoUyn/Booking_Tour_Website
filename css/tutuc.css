@@ -1,0 +1,231 @@
+/* TuTuc Layout Styles */
+.tutuc-container {
+    display: flex;
+    height: calc(100vh - 56px); /* Subtract navbar height */
+    overflow: hidden;
+}
+
+/* Map Section (Left Column - 60-65%) */
+.map-section {
+    flex: 0 0 65%;
+    position: relative;
+    background: #f8f9fa;
+}
+
+.map-controls {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    z-index: 1000;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.search-box {
+    display: flex;
+    gap: 5px;
+    flex: 1;
+    max-width: 300px;
+}
+
+#map {
+    width: 100%;
+    height: 100%;
+}
+
+/* Places Section (Right Column - 35-40%) */
+.places-section {
+    flex: 0 0 35%;
+    background: white;
+    border-left: 1px solid #dee2e6;
+    display: flex;
+    flex-direction: column;
+}
+
+.places-header {
+    padding: 20px;
+    border-bottom: 1px solid #dee2e6;
+    background: #f8f9fa;
+}
+
+.places-header h4 {
+    margin: 0 0 15px 0;
+    color: #333;
+    font-weight: 600;
+}
+
+.filter-section {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+/* Places List with Scroll */
+.places-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+/* Place Card Styles */
+.place-card {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    padding: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.place-card:hover {
+    border-color: #007bff;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    transform: translateY(-2px);
+}
+
+.place-card.selected {
+    border-color: #007bff;
+    background: #f0f8ff;
+}
+
+.place-name {
+    font-weight: 600;
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.place-rating {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.rating-stars {
+    color: #ffc107;
+    margin-right: 8px;
+}
+
+.rating-text {
+    font-size: 14px;
+    color: #666;
+}
+
+.place-address {
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+}
+
+.place-address i {
+    margin-right: 5px;
+}
+
+.place-type {
+    display: inline-block;
+    background: #e9ecef;
+    color: #495057;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    text-transform: capitalize;
+}
+
+.place-distance {
+    font-size: 12px;
+    color: #28a745;
+    font-weight: 500;
+    margin-top: 8px;
+}
+
+/* Loading Spinner */
+.loading-spinner {
+    color: #666;
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+    .tutuc-container {
+        flex-direction: column;
+    }
+    
+    .map-section {
+        flex: 0 0 50%;
+    }
+    
+    .places-section {
+        flex: 0 0 50%;
+        border-left: none;
+        border-top: 1px solid #dee2e6;
+    }
+}
+
+@media (max-width: 768px) {
+    .map-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .search-box {
+        max-width: none;
+    }
+    
+    .places-header {
+        padding: 15px;
+    }
+    
+    .place-card {
+        padding: 12px;
+    }
+}
+
+/* Custom Scrollbar */
+.places-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.places-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.places-list::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.places-list::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Map Marker Info Window */
+.info-window {
+    max-width: 250px;
+}
+
+.info-window h6 {
+    margin: 0 0 8px 0;
+    color: #333;
+}
+
+.info-window .rating {
+    color: #ffc107;
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.info-window .address {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.info-window .btn {
+    font-size: 12px;
+    padding: 4px 8px;
+}

@@ -9,13 +9,12 @@ using System.Security.Cryptography;
 using System.Text;
 using Tour_Website.ViewModels;
 using Tour_Website.Models;
-//using QRCoder; // NuGet: Install-Package QRCoder
 using System.Drawing;
 using System.IO;
 
 namespace Tour_Website.Controllers
 {
-    [AllowAnonymous] // Áp dụng cho toàn bộ controller nếu cần, nhưng tốt hơn là chỉ cho actions public
+    [AllowAnonymous]
     public class AccountController : Controller
     {
         private UserDAO userDAO = new UserDAO();
@@ -36,12 +35,14 @@ namespace Tour_Website.Controllers
         {
             if (ModelState.IsValid)
             {
+                var hashedPassword = HashPassword(model.Password);
                 if (userDAO.CheckEmailExist(model.Email))
                 {
                     ModelState.AddModelError("", "Email này đã được sử dụng.");
                     return View(model);
                 }
 
+                model.Password = hashedPassword;
                 if (userDAO.Register(model))
                 {
                     TempData["SuccessMessage"] = "Đăng ký thành công! Vui lòng đăng nhập.";
@@ -71,14 +72,11 @@ namespace Tour_Website.Controllers
         {
             if (ModelState.IsValid)
             {
-                if (userDAO.Login(model.Email, model.Password))
+                var hashedPassword = HashPassword(model.Password);
+                if (userDAO.Login(model.Email, hashedPassword))
                 {
-                    // Tạo Cookie xác thực (Quan trọng để User.Identity.IsAuthenticated = true)
                     FormsAuthentication.SetAuthCookie(model.Email, model.RememberMe);
-
-                    // Lưu Email vào Session để dùng cho các trang khác
                     Session["UserEmail"] = model.Email;
-
                     if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                     {
                         return Redirect(returnUrl);
@@ -175,6 +173,23 @@ namespace Tour_Website.Controllers
 
             // Quay về trang chủ
             return RedirectToAction("Index", "Home");
+        }
+
+        private static string HashPassword(string password)
+        {
+            if (string.IsNullOrWhiteSpace(password))
+                return string.Empty;
+
+            using (var sha = SHA256.Create())
+            {
+                var hashBytes = sha.ComputeHash(Encoding.UTF8.GetBytes(password));
+                var sb = new StringBuilder();
+                foreach (var b in hashBytes)
+                {
+                    sb.Append(b.ToString("x2"));
+                }
+                return sb.ToString();
+            }
         }
     }
 }
