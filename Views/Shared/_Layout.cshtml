@@ -107,9 +107,7 @@
 					<li class="nav-item">
 						<a class="nav-link" href="@Url.Action("Index", "Home")#about">About</a>
 					</li>
-					<li class="nav-item">
-						<a class="nav-link" href="@Url.Action("Index", "Home")#travelling">Travelling</a>
-					</li>
+					
 					<li class="nav-item">
 						<a class="nav-link" href="@Url.Action("Index", "Home")#contact">Contact</a>
 					</li>
@@ -122,9 +120,7 @@
 							<a class="dropdown-item" href="@Url.Action("TourNhom", "Travel")">Order Tours</a>
 						</div>
 					</li>
-					<li class="nav-item">
-						<a href="@Url.Action("Contact","Home")" class="nav-link">Contact</a>
-					</li>
+					
 					@if (Session["UserRole"] != null && new[] { "Admin", "Manager", "Staff" }.Contains(Session["UserRole"].ToString(), StringComparer.OrdinalIgnoreCase))
 					{
 						<li class="nav-item">

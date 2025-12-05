@@ -1,75 +1,58 @@
-﻿@using Newtonsoft.Json
+﻿@using Newtonsoft.Json;
 @model Tour_Website.ViewModels.TourNhomViewModel
 
 @{
-    ViewBag.Title = "Group Tours";
+	ViewBag.Title = "Group Tours";
 }
-<h2>Group Tours</h2>
-<p>Join guided group tours for hassle-free adventures with expert leaders and fellow travelers.</p>
 
 <link href="~/Content/TuTuc.css" rel="stylesheet" />
-<style>
-	.tour-toolbar {
-		margin-bottom: 1.5rem;
-	}
-	.tour-card {
-		border-radius: 16px;
-		overflow: hidden;
-		box-shadow: 0 20px 35px rgba(0,0,0,0.08);
-		transition: transform 0.3s ease;
-	}
-	.tour-card:hover {
-		transform: translateY(-6px);
-	}
-	.tour-card img {
-		height: 220px;
-		object-fit: cover;
-	}
-	.tour-card .card-body {
-		min-height: 270px;
-	}
-	.badge-sold {
-		font-size: 0.8rem;
-	}
-	.itinerary-day {
-		border-bottom: 1px solid #eaeaea;
-		padding-bottom: 0.5rem;
-		margin-bottom: 0.75rem;
-	}
-	.cart-toast {
-		position: fixed;
-		top: 1rem;
-		right: 1rem;
-		padding: 0.75rem 1rem;
-		border-radius: 0.75rem;
-		color: #fff;
-		font-weight: 600;
-		display: none;
-		box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-		z-index: 1500;
-	}
-	.cart-toast.visible {
-		display: block;
-	}
-</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css" />
 
-<div id="cartToast" class="cart-toast bg-success"></div>
-
-<div class="tour-toolbar d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
-	<div class="d-flex gap-2 flex-fill">
-		<input type="text" id="tourSearch" class="form-control" placeholder="Tìm tour theo tên..." />
-		<button class="btn btn-primary" id="tourSearchBtn">Search</button>
+<div class="tour-search-hero">
+	<div class="container">
+		<h2 class="text-white mb-3">Tìm Tour Nhóm Hoàn Hảo</h2>
+		<p class="text-light">Khám phá các tour du lịch nhóm đặc biệt với giá tốt nhất</p>
 	</div>
-	<select id="tourCategory" class="form-select w-100 w-md-auto">
-		<option value="all">Tất cả danh mục</option>
-		@foreach (var category in Model.Categories)
-		{
-			<option value="@category.Slug">@category.Name</option>
-		}
-	</select>
 </div>
 
-<div id="tourCards" class="row g-4"></div>
+<div class="container">
+	<div class="search-form-container">
+		<div class="search-tabs">
+			<button class="active" data-tab="tour">Search Tour</button>
+			<button data-tab="hotel">Hotel</button>
+		</div>
+
+		<div class="search-form-row">
+			<div class="form-group-search">
+				<label>Tên Tour / Địa Điểm</label>
+				<input type="text" id="tourSearch" placeholder="Tìm tour theo tên..." class="form-control">
+			</div>
+			<div class="form-group-search">
+				<label>Ngày Bắt Đầu</label>
+				<input type="text" id="startDate" placeholder="Chọn ngày..." class="form-control datepicker">
+			</div>
+			<div class="form-group-search">
+				<label>Ngày Kết Thúc</label>
+				<input type="text" id="endDate" placeholder="Chọn ngày..." class="form-control datepicker">
+			</div>
+			<div class="form-group-search">
+				<label>Giá Tối Đa</label>
+				<select id="priceLimit" class="form-control">
+					<option value="0">Tất cả</option>
+					<option value="2000000">2 Triệu</option>
+					<option value="5000000">5 Triệu</option>
+					<option value="10000000">10 Triệu</option>
+					<option value="20000000">20 Triệu</option>
+				</select>
+			</div>
+			<button class="btn-search-large" id="tourSearchBtn">Search</button>
+		</div>
+	</div>
+
+	<div class="tour-grid">
+		<div id="tourCards" class="row g-4"></div>
+	</div>
+</div>
 
 <!-- Detail modal -->
 <div class="modal fade" id="tourDetailModal" tabindex="-1">
@@ -82,29 +65,74 @@
 			<div class="modal-body" id="tourDetailBody"></div>
 			<div class="modal-footer border-top">
 				<span class="badge bg-success me-auto" id="tourDetailSlots"></span>
-				<button type="button" class="btn btn-outline-secondary" id="modalAddButton">Thêm vào giỏ hàng</button>
+				<button type="button" class="btn btn-outline-secondary" id="modalAddCartButton">Thêm vào giỏ hàng</button>
 				<button type="button" class="btn btn-primary">Mua tour</button>
 			</div>
 		</div>
 	</div>
 </div>
 
-@section scripts {
-	<script>
-		const addToCartUrl = '@Url.Action("AddToCart", "Travel")';
-		const cartToast = document.getElementById('cartToast');
-		const cartCountEl = document.getElementById('cart-count');
+<div id="cartToast" class="cart-toast bg-success"></div>
 
+@section scripts {
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
+	<script>
 		const tourData = @Html.Raw(JsonConvert.SerializeObject(Model.Tours));
 		const formatter = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' });
+		const addToCartUrl = '@Url.Action("AddToCart", "Cart")';
+		const loginUrl = '@Url.Action("Login", "Account")';
+
 		const tourCardsEl = document.getElementById('tourCards');
 		const searchInput = document.getElementById('tourSearch');
 		const searchBtn = document.getElementById('tourSearchBtn');
-		const categorySelect = document.getElementById('tourCategory');
+		const startDateInput = document.getElementById('startDate');
+		const endDateInput = document.getElementById('endDate');
+		const priceLimitSelect = document.getElementById('priceLimit');
+		const cartToast = document.getElementById('cartToast');
+		const cartCountEl = document.getElementById('cart-count');
 		const modal = new bootstrap.Modal(document.getElementById('tourDetailModal'));
 		const modalTitle = document.getElementById('tourDetailTitle');
 		const modalBody = document.getElementById('tourDetailBody');
 		const modalSlots = document.getElementById('tourDetailSlots');
+		const modalAddCartButton = document.getElementById('modalAddCartButton');
+
+		let currentModalTourId = null;
+
+		// Initialize datepickers
+		$('#startDate, #endDate').datepicker({
+			format: 'dd/mm/yyyy',
+			autoclose: true,
+			todayHighlight: true
+		});
+
+		// Tab switching
+		document.querySelectorAll('.search-tabs button').forEach(btn => {
+			btn.addEventListener('click', (e) => {
+				document.querySelectorAll('.search-tabs button').forEach(b => b.classList.remove('active'));
+				e.target.classList.add('active');
+				// Can add hotel search functionality here if needed
+			});
+		});
+
+		// Event listeners
+		searchBtn.addEventListener('click', filterTours);
+		searchInput.addEventListener('keypress', (e) => {
+			if (e.key === 'Enter') {
+				e.preventDefault();
+				filterTours();
+			}
+		});
+		startDateInput.addEventListener('change', filterTours);
+		endDateInput.addEventListener('change', filterTours);
+		priceLimitSelect.addEventListener('change', filterTours);
+
+		modalAddCartButton.addEventListener('click', () => {
+			if (!currentModalTourId) {
+				showCartMessage('Không xác định tour.', false);
+				return;
+			}
+			handleAddToCart(currentModalTourId);
+		});
 
 		function renderTours(list) {
 			if (!list.length) {
@@ -134,38 +162,6 @@
 				</div>
 			`).join('');
 			bindDetailButtons();
-		}
-
-		function handleAddToCart(tourId) {
-			fetch(addToCartUrl, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({ tourId: tourId, quantity: 1 })
-			})
-				.then(res => res.json())
-				.then(data => {
-					if (data.success) {
-						showCartMessage(data.message, true);
-						if (cartCountEl) {
-							cartCountEl.textContent = data.cartCount ?? 0;
-						}
-					} else {
-						showCartMessage(data.message, false);
-					}
-				})
-				.catch(() => {
-					showCartMessage('Có lỗi khi thêm vào giỏ hàng.', false);
-				});
-		}
-
-		function showCartMessage(text, success = true) {
-			cartToast.textContent = text;
-			cartToast.classList.remove('bg-success', 'bg-danger');
-			cartToast.classList.add(success ? 'bg-success' : 'bg-danger');
-			cartToast.classList.add('visible');
-			setTimeout(() => cartToast.classList.remove('visible'), 3000);
 		}
 
 		function bindDetailButtons() {
@@ -201,20 +197,52 @@
 
 		function filterTours() {
 			const term = searchInput.value.trim().toLowerCase();
-			const category = categorySelect.value;
+			const priceLimit = parseInt(priceLimitSelect.value) || 0;
+
 			const filtered = tourData.filter(tour => {
 				const matchesTerm = !term || tour.TourName.toLowerCase().includes(term);
-				const matchesCategory = category === 'all' ||
-					tour.CategoryName.replace(/\s+/g, '-').toLowerCase() === category;
-				return matchesTerm && matchesCategory;
+				const matchesPrice = priceLimit === 0 || tour.Price <= priceLimit;
+				return matchesTerm && matchesPrice;
 			});
+
 			renderTours(filtered);
 		}
 
-		searchBtn.addEventListener('click', filterTours);
-		searchInput.addEventListener('input', filterTours);
-		categorySelect.addEventListener('change', filterTours);
+		function handleAddToCart(tourId) {
+			fetch(addToCartUrl, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ tourId: tourId, quantity: 1 })
+			})
+				.then(res => res.json())
+				.then(data => {
+					if (data.requiresLogin) {
+						window.location.href = loginUrl + '?returnUrl=' + encodeURIComponent(window.location.href);
+						return;
+					}
+					if (data.success) {
+						showCartMessage(data.message, true);
+						if (cartCountEl) cartCountEl.textContent = data.cartCount ?? 0;
+						setTimeout(() => {
+							const m = bootstrap.Modal.getInstance(document.getElementById('tourDetailModal'));
+							if (m) m.hide();
+						}, 1500);
+					} else {
+						showCartMessage(data.message, false);
+					}
+				})
+				.catch(() => showCartMessage('Có lỗi khi thêm vào giỏ hàng.', false));
+		}
 
+		function showCartMessage(text, success = true) {
+			cartToast.textContent = text;
+			cartToast.classList.remove('bg-success', 'bg-danger');
+			cartToast.classList.add(success ? 'bg-success' : 'bg-danger');
+			cartToast.classList.add('visible');
+			setTimeout(() => cartToast.classList.remove('visible'), 3000);
+		}
+
+		// Initial render
 		renderTours(tourData);
 	</script>
 }

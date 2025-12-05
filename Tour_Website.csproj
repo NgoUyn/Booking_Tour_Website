@@ -366,6 +366,7 @@
     <Content Include="Content\pacific-main\js\scrollax.min.js" />
     <Content Include="Content\pacific-main\main.html" />
     <Content Include="Content\pacific-main\readme.txt" />
+    <Content Include="Content\TouNhom.css" />
     <Content Include="Content\TuTuc.css" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
@@ -627,6 +628,7 @@
     <Content Include="Views\Account\SaveTours.cshtml" />
     <Content Include="Views\Account\BookingHistory.cshtml" />
     <Content Include="Views\Admin\Dashboard.cshtml" />
+    <Content Include="Views\Cart\CartIndex.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

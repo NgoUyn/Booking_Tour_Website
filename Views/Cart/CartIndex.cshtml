@@ -1,0 +1,135 @@
+﻿@model Tour_Website.ViewModels.CartViewModel
+
+@{
+    ViewBag.Title = "Giỏ hàng của bạn";
+}
+
+<h2 class="mb-4">Giỏ hàng của bạn</h2>
+
+@if (Model == null || !Model.Items.Any())
+{
+    <div class="alert alert-info">Giỏ hàng trống. <a href="@Url.Action("TourNhom","Travel")">Tiếp tục mua sắm</a></div>
+}
+else
+{
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr class="table-light">
+                                <th scope="col">Sản phẩm</th>
+                                <th scope="col" class="text-center">Giá</th>
+                                <th scope="col" class="text-center">Số lượng</th>
+                                <th scope="col" class="text-end">Tổng cộng</th>
+                                <th scope="col" class="text-center">Xóa</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.Items)
+                            {
+                                <tr id="ci-@item.CartItemId">
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="@item.AvatarUrl" class="me-3" alt="@item.TourName" width="70" />
+                                            <div>
+                                                <div class="fw-bold">@item.TourName</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">@item.UnitPrice.ToString("N0") VNĐ</td>
+                                    <td class="text-center">
+                                        <div class="d-flex justify-content-center align-items-center">
+                                            <button class="btn btn-sm btn-outline-danger mx-1 update-qty" data-id="@item.CartItemId" data-step="-1">-</button>
+                                            <input type="text" readonly class="form-control form-control-sm text-center" style="width:60px" value="@item.Quantity" id="q-@item.CartItemId" />
+                                            <button class="btn btn-sm btn-outline-success mx-1 update-qty" data-id="@item.CartItemId" data-step="1">+</button>
+                                        </div>
+                                    </td>
+                                    <td class="text-end fw-bold" id="sub-@item.CartItemId">@item.SubTotal.ToString("N0") VNĐ</td>
+                                    <td class="text-center">
+                                        <button class="btn btn-sm btn-outline-danger remove-item" data-id="@item.CartItemId">Xóa</button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <a href="@Url.Action("TourNhom","Travel")" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Tiếp tục mua sắm
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white fw-bold">
+                    Tóm tắt đơn hàng
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Tổng tiền hàng:</span>
+                        <span class="fw-bold" id="total">@Model.Total.ToString("N0") VNĐ</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Phí vận chuyển:</span>
+                        <span class="fw-bold" id="shipping">@Model.Shipping.ToString("N0") VNĐ</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between mb-3 text-danger fs-5">
+                        <span class="fw-bold">TỔNG THANH TOÁN:</span>
+                        <span class="fw-bold" id="final">@Model.FinalTotal.ToString("N0") VNĐ</span>
+                    </div>
+                    <a href="#" class="btn btn-success w-100 btn-lg">Thanh toán</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="@Url.Content("~/Content/pacific-main/js/jquery.min.js")"></script>
+    <script>
+        $(function () {
+            function refreshTotals(data) {
+                if (!data) return;
+                $('#total').text((data.total || 0).toLocaleString('vi-VN') + ' VNĐ');
+                // shipping is static from server-side viewmodel here
+                var shipping = parseInt('@Model.Shipping');
+                $('#final').text(((data.total || 0) + shipping).toLocaleString('vi-VN') + ' VNĐ');
+            }
+
+            $('.update-qty').click(function () {
+                var id = $(this).data('id');
+                var step = parseInt($(this).data('step'));
+                var qEl = $('#q-' + id);
+                var current = parseInt(qEl.val());
+                var next = Math.max(0, current + step);
+                // call server to set new quantity
+                $.post('@Url.Action("UpdateQuantity","Cart")', { cartItemId: id, quantity: next }, function (res) {
+                    if (res && res.success) {
+                        qEl.val(next);
+                        $('#sub-' + id).text((res.itemSubtotal || 0).toLocaleString('vi-VN') + ' VNĐ');
+                        refreshTotals(res);
+                    } else {
+                        alert(res && res.message ? res.message : 'Có lỗi');
+                    }
+                }).fail(function () { alert('Có lỗi server.'); });
+            });
+
+            $('.remove-item').click(function () {
+                if (!confirm('Bạn có chắc muốn xóa mục này?')) return;
+                var id = $(this).data('id');
+                $.post('@Url.Action("RemoveFromCart","Cart")', { cartItemId: id }, function (res) {
+                    if (res && res.success) {
+                        $('#ci-' + id).remove();
+                        refreshTotals(res);
+                    } else {
+                        alert(res && res.message ? res.message : 'Có lỗi');
+                    }
+                }).fail(function () { alert('Có lỗi server.'); });
+            });
+        });
+    </script>
+}
