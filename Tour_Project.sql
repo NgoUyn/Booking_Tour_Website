@@ -338,7 +338,50 @@ CREATE TABLE RoutePoint
 );
 GO
 
-USE Tour_Project;
+CREATE TABLE AdminRole
+(
+    RoleID INT IDENTITY(1,1) PRIMARY KEY,
+    RoleName NVARCHAR(50) NOT NULL UNIQUE   -- Staff, Manager
+);
+GO
+
+-- Insert quyền mặc định
+INSERT INTO AdminRole (RoleName)
+VALUES ('Staff'), ('Manager');
+GO
+
+
+/* ============================
+   BẢNG ADMIN — THÊM MỚI AN TOÀN
+   ============================ */
+
+   CREATE TABLE AdminStaff
+(
+    AdminID INT IDENTITY(1,1) PRIMARY KEY,
+    AdminName NVARCHAR(150) NOT NULL,
+    Email NVARCHAR(200) NOT NULL UNIQUE,
+    BirthDate DATE NULL,
+    PhoneNumber NVARCHAR(20) NULL,
+    AvtUrl NVARCHAR(300) NULL,
+    RoleID INT NOT NULL,                           -- Khóa ngoại
+    Password NVARCHAR(256) NOT NULL,               -- Bạn tạm thời để plain text
+    CreatedAt DATETIME NOT NULL DEFAULT GETDATE(),
+
+    CONSTRAINT FK_AdminStaff_Role
+        FOREIGN KEY (RoleID) REFERENCES AdminRole(RoleID)
+);
+GO
+
+ INSERT INTO AdminStaff 
+    (AdminName, Email, BirthDate, PhoneNumber, AvtUrl, RoleID, Password)
+VALUES
+   
+
+    (N'Trần Thị Hương', 'huong.tran@touradmin.com', '1994-09-20',
+     '0902334988', 'avt_huong.png', 2, 'manager123'),
+
+    (N'Lê Công Phát', 'phat.le@touradmin.com', '1998-02-10',
+     '0978890066', 'avt_phat.png', 1, 'staff123');
 GO
 
 -- XÓA DỮ LIỆU 
@@ -379,6 +422,9 @@ DBCC CHECKIDENT ('Place', RESEED, 0);
 DBCC CHECKIDENT ('Voucher', RESEED, 0);
 DBCC CHECKIDENT ('Category', RESEED, 0);
 DBCC CHECKIDENT ('Users', RESEED, 0);
+DBCC CHECKIDENT ('AdminStaff', RESEED, 0);
+DBCC CHECKIDENT ('AdminRole', RESEED, 0);
+
 GO
 
 
@@ -735,39 +781,10 @@ INSERT INTO RoutePoint (RouteID, PlaceID, OrderInRoute, DistanceKm, DurationMin)
 (13, 13, 1, 0.00, 0);  -- Route 13: Điểm 1 (Bảo tàng Lịch sử, Start)
 GO
 
---PHẦN MỞ RỘNG---
- TABLE AdminStaff
-(
-    StaffID INT PRIMARY KEY IDENTITY(1,1),
-    UserID INT UNIQUE,
-    StaffRole NVARCHAR(20) CHECK (StaffRole IN ('Manager','Staff')),
-    CreatedAt DATETIME DEFAULT GETDATE(),
 
-    CONSTRAINT FK_AdminStaff_User FOREIGN KEY (UserID) REFERENCES Users(UserID)
-);
-GO
 
-INSERT INTO AdminStaff(UserID, StaffRole) VALUES (2,'Manager');
-INSERT INTO AdminStaff(UserID, StaffRole) VALUES (11,'Staff');
-GO
 
--- trigger tự động chuyển level người dùng thành VIP
-CREATE TRIGGER TG_UpdateMemberLevel
-ON Users
-AFTER UPDATE
-AS
-BEGIN
-    UPDATE Users
-    SET MemberLevel =
-        CASE
-            WHEN TotalSpent < 1000 THEN 'Basic'
-            WHEN TotalSpent BETWEEN 1000 AND 4999 THEN 'Member'
-            ELSE 'VIP'
-        END
-    FROM Users u
-    INNER JOIN inserted i ON u.UserID = i.UserID;
-END
-GO
+    
 
  -- trigger tự động tăng totalspent khi đặt tour thành công
 CREATE TRIGGER TG_Order_AddSpent
@@ -793,29 +810,36 @@ ON Users
 INSTEAD OF UPDATE
 AS
 BEGIN
-    -- Chỉ cho phép nhân viên sửa user nếu AllowStaffEdit = 1
+    SET NOCOUNT ON;
+
+    -- Nếu khách KHÔNG cho phép sửa (AllowStaffEdit = 0) → chặn thao tác
     IF EXISTS (
-        SELECT 1 
+        SELECT 1
         FROM inserted i
         JOIN Users u ON i.UserID = u.UserID
         WHERE u.AllowStaffEdit = 0
     )
     BEGIN
-        RAISERROR('Khách hàng chưa cho phép nhân viên chỉnh sửa thông tin.', 16, 1);
+        RAISERROR ('Khách hàng chưa cho phép nhân viên chỉnh sửa thông tin.', 16, 1);
         RETURN;
     END;
 
-    -- Nếu được phép → thực hiện update bình thường
-    UPDATE Users
+    -- Nếu khách cho phép → cho phép update bình thường
+    UPDATE U
     SET 
-        FullName = i.FullName,
+        UserName = i.UserName,
+        BirthDate = i.BirthDate,
         Email = i.Email,
         Phone = i.Phone,
-        Address = i.Address,
-        AllowStaffEdit = i.AllowStaffEdit
-    FROM inserted i
-    WHERE Users.UserID = i.UserID;
-END
+        AvatarUrl = i.AvatarUrl,
+        Status = i.Status,
+        TotalSpent = i.TotalSpent,
+        AllowStaffEdit = i.AllowStaffEdit  -- nhân viên có thể tắt quyền sau khi chỉnh sửa
+    FROM Users U
+    INNER JOIN inserted i ON U.UserID = i.UserID;
+END;
+GO
+
 GO
 -- procedure đặt tour + giao dịch
 CREATE PROCEDURE SP_BookTour
@@ -900,25 +924,7 @@ BEGIN
 END
 GO
 
--- function kiểm tra role của người dùng
-CREATE FUNCTION FN_GetUserRole (@UserID INT)
-RETURNS NVARCHAR(50)
-AS
-BEGIN
-    DECLARE @Role NVARCHAR(50);
 
-    SELECT @Role =
-        CASE 
-            WHEN EXISTS (SELECT 1 FROM AdminStaff WHERE UserID=@UserID AND StaffRole='Manager') 
-                THEN 'Manager'
-            WHEN EXISTS (SELECT 1 FROM AdminStaff WHERE UserID=@UserID AND StaffRole='Staff') 
-                THEN 'Staff'
-            ELSE 'User'
-        END;
-
-    RETURN @Role;
-END;
-GO
 
 
 -- Quản lí người dùng và phân quyền
@@ -928,22 +934,38 @@ GO
 
 
 -- chỉ cho nhân viên xem dữ liệu người dùng và tour người dùng đã đặt, cho phép hủy tour 
+-- PHÂN QUYỀN
+CREATE LOGIN AdminLogin WITH PASSWORD = 'Vietwander xin chao';
+CREATE USER AdminUser FOR LOGIN AdminLogin;
+GO
 
--- 1. Xem thông tin người dùng
-GRANT SELECT ON Users TO StaffUser;
+CREATE ROLE StaffRole;
+GO
 
--- 2. Xem tour & booking của người dùng
-GRANT SELECT ON Tour TO StaffUser;
-GRANT SELECT ON Booking TO StaffUser;
+-- Quyền xem dữ liệu người dùng
+GRANT SELECT ON Users TO StaffRole;
 
--- 3. Hủy tour người dùng đã đặt
-GRANT DELETE ON Booking TO StaffUser;
+-- Quyền xem Tour & Booking
+GRANT SELECT ON Tour TO StaffRole;
+GRANT SELECT ON [Order] TO StaffRole;
+GRANT SELECT ON OrderDetail TO StaffRole;
+-- Quyền hủy Booking (DELETE)
+GRANT DELETE ON [Order] TO StaffRole;
+GRANT DELETE ON OrderDetail TO StaffRole;
 
 GO
 
--- manager được toàn quyền
-GRANT CONTROL ON DATABASE::Tour_Project TO StaffUser;
+ALTER ROLE StaffRole ADD MEMBER AdminUser;
+
+
+
+CREATE ROLE ManagerRole;
 GO
+
+GRANT CONTROL ON DATABASE::Tour_Project TO ManagerRole;
+GO
+
+ALTER ROLE ManagerRole ADD MEMBER AdminUser;
 
 
 -- trigger ghi lịch sử chỉnh sửa
@@ -952,27 +974,70 @@ CREATE TABLE AuditLog
     LogID INT PRIMARY KEY IDENTITY(1,1),
     TableName NVARCHAR(100),
     Action NVARCHAR(10),
-    UserName NVARCHAR(255),
+    AdminName NVARCHAR(255),
     TimeStamp DATETIME DEFAULT GETDATE(),
     Detail NVARCHAR(MAX)
 );
 GO
 
-CREATE TRIGGER TG_Log_Update_Place
-ON Place
-AFTER UPDATE
-AS
+-- Đảm bảo bảng AuditLog đã tồn tại
+IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'AuditLog' AND schema_id = SCHEMA_ID('dbo'))
 BEGIN
-    INSERT INTO AuditLog(TableName,Action,UserName,Detail)
-    SELECT
-        'Place',
-        'UPDATE',
-        SYSTEM_USER,
-        CONCAT('PlaceID=',i.PlaceID,' changed.')
-    FROM inserted i;
+    CREATE TABLE dbo.AuditLog
+    (
+        LogID INT PRIMARY KEY IDENTITY(1,1),
+        TableName NVARCHAR(100),
+        Action NVARCHAR(10),
+        UserName NVARCHAR(255),
+        TimeStamp DATETIME DEFAULT GETDATE(),
+        Detail NVARCHAR(MAX)
+    );
 END
 GO
 
+-- Tạo / thay thế trigger an toàn, không giả định cột cụ thể
+CREATE OR ALTER TRIGGER TG_Log_Update_Place
+ON dbo.Place
+AFTER UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
 
--- Test admin
+    -- Lấy admin từ session context, CONVERT để tránh lỗi sql_variant -> nvarchar
+    DECLARE @AdminEmail NVARCHAR(255);
+    SET @AdminEmail = CONVERT(NVARCHAR(255), SESSION_CONTEXT(N'AdminEmail'));
 
+    IF (@AdminEmail IS NULL OR LTRIM(RTRIM(@AdminEmail)) = '')
+        SET @AdminEmail = ORIGINAL_LOGIN();  -- fallback
+
+    -- Chèn một hàng log cho mỗi bản ghi thay đổi
+    INSERT INTO dbo.AuditLog (TableName, Action, AdminName, Detail)
+    SELECT
+        'Place' AS TableName,
+        'UPDATE' AS Action,
+        @AdminEmail AS UserName,
+        -- Detail gồm row cũ và row mới dưới dạng XML (an toàn cho mọi schema)
+        CONCAT(
+            'Old=', 
+            ISNULL(
+                CONVERT(NVARCHAR(MAX),
+                    (SELECT d2.* 
+                     FROM deleted d2 
+                     WHERE d2.PlaceID = d.PlaceID
+                     FOR XML RAW('row'), TYPE).value('.', 'NVARCHAR(MAX)')
+                ), 
+            'NULL'),
+            '; New=',
+            ISNULL(
+                CONVERT(NVARCHAR(MAX),
+                    (SELECT i2.* 
+                     FROM inserted i2 
+                     WHERE i2.PlaceID = i.PlaceID
+                     FOR XML RAW('row'), TYPE).value('.', 'NVARCHAR(MAX)')
+                ),
+            'NULL')
+        ) AS Detail
+    FROM inserted i
+    LEFT JOIN deleted d ON i.PlaceID = d.PlaceID;
+END;
+GO

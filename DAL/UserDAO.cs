@@ -8,6 +8,7 @@ using System.Text;
 using System.Web;
 using Tour_Website.Models;
 using Tour_Website.ViewModels;
+using Tour_Website.Models.Entities;
 
 namespace Tour_Website.DAL
 {

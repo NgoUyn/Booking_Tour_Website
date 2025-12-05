@@ -11,6 +11,7 @@ using Tour_Website.ViewModels;
 using Tour_Website.Models;
 using System.Drawing;
 using System.IO;
+using Tour_Website.Models.Entities;
 
 namespace Tour_Website.Controllers
 {
@@ -18,7 +19,7 @@ namespace Tour_Website.Controllers
     public class AccountController : Controller
     {
         private UserDAO userDAO = new UserDAO();
-        private TourProject_Database db = new TourProject_Database();
+        private TourProject_Database1 db = new TourProject_Database1();
 
         // GET: /Account/Register
         [AllowAnonymous]
@@ -35,14 +36,13 @@ namespace Tour_Website.Controllers
         {
             if (ModelState.IsValid)
             {
-                var hashedPassword = HashPassword(model.Password);
                 if (userDAO.CheckEmailExist(model.Email))
                 {
                     ModelState.AddModelError("", "Email này đã được sử dụng.");
                     return View(model);
                 }
 
-                model.Password = hashedPassword;
+                model.Password = HashPassword(model.Password);
                 if (userDAO.Register(model))
                 {
                     TempData["SuccessMessage"] = "Đăng ký thành công! Vui lòng đăng nhập.";
@@ -72,11 +72,16 @@ namespace Tour_Website.Controllers
         {
             if (ModelState.IsValid)
             {
-                var hashedPassword = HashPassword(model.Password);
-                if (userDAO.Login(model.Email, hashedPassword))
+                if (userDAO.Login(model.Email, model.Password))
                 {
-                    FormsAuthentication.SetAuthCookie(model.Email, model.RememberMe);
-                    Session["UserEmail"] = model.Email;
+                    var user = userDAO.GetUserByEmail(model.Email);
+                    if (user != null)
+                    {
+                        FormsAuthentication.SetAuthCookie(model.Email, model.RememberMe);
+                        Session["UserEmail"] = model.Email;
+                        Session["UserRole"] = user.Role ?? "User";
+                    }
+
                     if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                     {
                         return Redirect(returnUrl);

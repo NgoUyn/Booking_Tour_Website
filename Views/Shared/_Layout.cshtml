@@ -119,6 +119,14 @@
 					<li class="nav-item">
 						<a href="@Url.Action("Contact","Home")" class="nav-link">Contact</a>
 					</li>
+					@if (Session["UserRole"] != null && new[] { "Admin", "Manager", "Staff" }.Contains(Session["UserRole"].ToString()))
+					{
+						<li class="nav-item">
+							<a class="nav-link text-warning fw-semibold" href="@Url.Action("Dashboard", "Admin")">
+								<i class="fa fa-shield-alt me-1"></i>Admin Dashboard
+							</a>
+						</li>
+					}
 				</ul>
 			</div>
 

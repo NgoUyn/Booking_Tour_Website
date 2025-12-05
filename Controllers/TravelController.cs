@@ -7,13 +7,13 @@ using System.Web.Mvc;
 using Tour_Website.Models;
 using Tour_Website.ViewModels;
 using System.Text;
-
+using Tour_Website.Models.Entities;
 
 namespace Tour_Website.Controllers
 {
     public class TravelController : Controller
     {
-        private TourProject_Database db = new TourProject_Database();
+        private TourProject_Database1 db = new TourProject_Database1();
         // GET: Travel
 
         public ActionResult TuTuc()
