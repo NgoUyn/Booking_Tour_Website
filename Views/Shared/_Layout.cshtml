@@ -102,10 +102,16 @@
 			<div class="collapse navbar-collapse justify-content-center" id="ftco-nav">
 				<ul class="navbar-nav mx-auto">
 					<li class="nav-item active">
-						<a href="@Url.Action("Index","Home")" class="nav-link">Home</a>
+						<a class="nav-link" href="@Url.Action("Index", "Home")">Home</a>
 					</li>
 					<li class="nav-item">
-						<a href="@Url.Action("About","Home")" class="nav-link">About</a>
+						<a class="nav-link" href="@Url.Action("Index", "Home")#about">About</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="@Url.Action("Index", "Home")#travelling">Travelling</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="@Url.Action("Index", "Home")#contact">Contact</a>
 					</li>
 					<li class="nav-item dropdown">
 						<a class="nav-link dropdown-toggle" href="#" id="travellingDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -119,10 +125,10 @@
 					<li class="nav-item">
 						<a href="@Url.Action("Contact","Home")" class="nav-link">Contact</a>
 					</li>
-					@if (Session["UserRole"] != null && new[] { "Admin", "Manager", "Staff" }.Contains(Session["UserRole"].ToString()))
+					@if (Session["UserRole"] != null && new[] { "Admin", "Manager", "Staff" }.Contains(Session["UserRole"].ToString(), StringComparer.OrdinalIgnoreCase))
 					{
 						<li class="nav-item">
-							<a class="nav-link text-warning fw-semibold" href="@Url.Action("Dashboard", "Admin")">
+							<a class="nav-link fw-semibold text-warning" href="@Url.Action("Dashboard", "Admin")">
 								<i class="fa fa-shield-alt me-1"></i>Admin Dashboard
 							</a>
 						</li>

@@ -2,12 +2,27 @@
 	ViewBag.Title = "Admin Dashboard";
 }
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 <style>
 	body.admin-dashboard {
-		font-family: 'Poppins', sans-serif;
+		font-family: 'Noto Sans', 'Poppins', 'Segoe UI', sans-serif;
 		background: #f5f6fb;
 		min-height: 100vh;
+	}
+	.sidebar,
+	.main-area {
+		font-family: inherit;
+	}
+	.stat-card h3,
+	.content-panel h5,
+	.datagrid th,
+	.datagrid td,
+	.modal-body,
+	.modal-footer {
+		font-family: inherit;
 	}
 	.admin-shell {
 		display: grid;

@@ -79,14 +79,41 @@ namespace Tour_Website.DAL
                 if (result != null)
                 {
                     string dbPassHash = result.ToString();
-                    return dbPassHash == HashPassword(password);
+                    var hashedInput = HashPassword(password);
+                    if (dbPassHash == hashedInput || dbPassHash == password)
+                    {
+                        return true;
+                    }
                 }
-                return false;
+
+                return ValidateAdminCredentials(email, password);
+            }
+        }
+
+        private bool ValidateAdminCredentials(string email, string password)
+        {
+            string query = "SELECT Password FROM AdminStaff WHERE Email = @Email";
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlCommand cmd = new SqlCommand(query, conn))
+            {
+                cmd.Parameters.AddWithValue("@Email", email);
+                conn.Open();
+                object result = cmd.ExecuteScalar();
+                return result != null && result.ToString() == password;
             }
         }
 
         // 5. Lấy thông tin người dùng
-        public User GetUserByEmail(string email)
+        public new User GetUserByEmail(string email)
+        {
+            var user = GetApplicationUser(email);
+            if (user != null)
+                return user;
+
+            return GetAdminByEmail(email);
+        }
+
+        private User GetApplicationUser(string email)
         {
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
@@ -96,7 +123,6 @@ namespace Tour_Website.DAL
 
                 SqlCommand cmd = new SqlCommand(query, conn);
                 cmd.Parameters.AddWithValue("@Email", email);
-
                 conn.Open();
                 SqlDataReader reader = cmd.ExecuteReader();
 
@@ -120,6 +146,41 @@ namespace Tour_Website.DAL
                 }
                 return null;
             }
+        }
+
+        private User GetAdminByEmail(string email)
+        {
+            string query = @"SELECT a.AdminID, a.AdminName, a.Email, a.BirthDate, a.PhoneNumber, 
+                                    a.AvtUrl, r.RoleName
+                             FROM AdminStaff a
+                             JOIN AdminRole r ON a.RoleID = r.RoleID
+                             WHERE a.Email = @Email";
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlCommand cmd = new SqlCommand(query, conn))
+            {
+                cmd.Parameters.AddWithValue("@Email", email);
+                conn.Open();
+                SqlDataReader reader = cmd.ExecuteReader();
+
+                if (reader.Read())
+                {
+                    return new User
+                    {
+                        UserID = (int)reader["AdminID"],
+                        UserName = reader["AdminName"]?.ToString(),
+                        Email = reader["Email"]?.ToString(),
+                        Role = reader["RoleName"]?.ToString(),
+                        AvatarUrl = reader["AvtUrl"]?.ToString(),
+                        Phone = reader["PhoneNumber"]?.ToString(),
+                        BirthDate = reader["BirthDate"] != DBNull.Value ? (DateTime?)reader["BirthDate"] : null,
+                        Status = "Active",
+                        IsActive = true
+                    };
+                }
+            }
+
+            return null;
         }
 
         // 6. Lấy tên người dùng để hiển thị session

@@ -80,6 +80,12 @@ namespace Tour_Website.Controllers
                         FormsAuthentication.SetAuthCookie(model.Email, model.RememberMe);
                         Session["UserEmail"] = model.Email;
                         Session["UserRole"] = user.Role ?? "User";
+                        if (Session["UserRole"]?.ToString().Equals("Admin", StringComparison.OrdinalIgnoreCase) == true
+                            || Session["UserRole"]?.ToString().Equals("Manager", StringComparison.OrdinalIgnoreCase) == true
+                            || Session["UserRole"]?.ToString().Equals("Staff", StringComparison.OrdinalIgnoreCase) == true)
+                        {
+                            return RedirectToAction("Dashboard", "Admin");
+                        }
                     }
 
                     if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
